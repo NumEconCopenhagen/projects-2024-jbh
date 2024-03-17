@@ -14,7 +14,7 @@ class ExchangeEconomyClass:
         par.w1A = 0.8
         par.w2A = 0.3
 
-        # c. market clearing - Use the same naming convention
+        # c. market clearing
         par.w1B = 1 - par.w1A
         par.w2B = 1 - par.w2A
 
@@ -51,3 +51,21 @@ class ExchangeEconomyClass:
         eps2 = x2A-par.w2A + x2B-par.w2B
 
         return eps1,eps2
+    
+    def find_eq(self, P_1):
+
+        eps_1,eps_2=self.market_clear_err(P_1)
+
+        # Use python-built in functions to find the minimum absolute error
+        min_err1=abs(eps_1).min()
+        min_err2=abs(eps_2).min()
+
+        # Make vector indices to pass to price vector (make sure they are the same)
+        ids1=abs(eps_1)==min_err1
+        ids2=abs(eps_2)==min_err2
+        assert ids1[0] == ids2[0]
+
+        # Calculate market clearing price of price in P_1
+        market_clearing_p=P_1[ids1][0]
+
+        return market_clearing_p
