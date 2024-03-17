@@ -13,8 +13,8 @@ class ExchangeEconomyClass:
         # b. endowments
         par.w1A = 0.8
         par.w2A = 0.3
-
-        # c. market clearing
+        
+        # total endowment
         par.w1B = 1 - par.w1A
         par.w2B = 1 - par.w2A
 
