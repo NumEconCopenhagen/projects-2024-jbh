@@ -1,11 +1,9 @@
-# \[Group name\]
+# Jørgen Baun Høst
 
 **Group members:**
-- A
-- B
-- C
+- Jørgen Baun Høst (pjz633@alumni.ku.dk)
 
 This repository contains  
 1. Inaugural project. 
-2. Data project. We fetch data from **source x** on **y** and show that ...
+2. Data project. ACLED
 3. Model project. We model ...
