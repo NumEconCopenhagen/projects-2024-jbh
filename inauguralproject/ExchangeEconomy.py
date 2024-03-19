@@ -12,21 +12,22 @@ class ExchangeEconomyClass:
         self.w2B = 1 - w2A
 
     def utility_A(self,x1A,x2A):
-        ## Imposing restriction that demand can't be negative (utility would be a complex number, I think)
-        x1A=np.maximum(x1A, 0)
-        x2A=np.maximum(x2A, 0)
-
         alpha = self.alpha
+
+        ## Imposing restriction that demand can't be negative (utility would be a complex number, I think) or over 1
+        x1A=np.clip(x1A, 0,1)
+        x2A=np.clip(x2A, 0,1)
+
         util = x1A**alpha * x2A**(1 - alpha)
         return util
 
     def utility_B(self,x1B,x2B):
-
-        ## Imposing restriction that demand can't be negative (utility would be a complex number, I think)
-        x1B=np.maximum(x1B, 0)
-        x2B=np.maximum(x2B, 0)
-
         beta = self.beta
+
+        ## Imposing restriction that demand can't be negative (utility would be a complex number, I think) or over 1
+        x1B=np.clip(x1B, 0,1)
+        x2B=np.clip(x2B, 0,1)
+
         util = x1B**beta * x2B**(1 - beta)
         return util
 
@@ -35,6 +36,11 @@ class ExchangeEconomyClass:
         alpha = self.alpha
         x1A = alpha * (w1A * p1 + w2A) / p1
         x2A = (1 - alpha) * (w1A * p1 + w2A)
+
+        ## Imposing restriction that demand can't be negative (utility would be a complex number, I think) or over 1
+        x1A=np.clip(x1A, 0,1)
+        x2A=np.clip(x2A, 0,1)
+
         return x1A, x2A
 
     def demand_B(self,p1):
@@ -42,6 +48,10 @@ class ExchangeEconomyClass:
         beta = self.beta
         x1B = beta * (w1B * p1 + w2B) / p1
         x2B = (1 - beta) * (w1B * p1 + w2B)
+
+        ## Imposing restriction that demand can't be negative (utility would be a complex number, I think) or over 1
+        x1B=np.clip(x1B, 0,1)
+        x2B=np.clip(x2B, 0,1)
         return x1B, x2B
 
     def market_clear_err(self,p1):
@@ -53,20 +63,6 @@ class ExchangeEconomyClass:
         eps2 = x2A-self.w2A + x2B-self.w2B
 
         return eps1,eps2
-    
-    # def find_eq(self, p1):
-        
-    #     x1A,x2A = self.demand_A(p1)
-    #     x1B,x2B = self.demand_B(p1)
-        
-    #     eps1 = x1A-self.w1A + x1B-self.w1B
-    #     eps2 = x2A-self.w2A + x2B-self.w2B
-
-    #     if np.isclose(eps1+eps2,0, atol=1e-3):
-    #         return (x1A,x2A), (x1B,x2B), p1
-    #     else:
-    #         return None, None, None
-        
     
     def market_clear_price(self, P_1):
 
