@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+import numpy as np
 
 class ExchangeEconomyClass:
 
@@ -19,12 +20,23 @@ class ExchangeEconomyClass:
         par.w2B = 1 - par.w2A
 
     def utility_A(self,x1A,x2A):
-        par = self.par
-        return x1A**par.alpha * x2A**(1 - par.alpha)
+        ## Imposing restriction that demand can't be negative (utility would be a complex number, I think)
+        x1A=np.maximum(x1A, 0)
+        x2A=np.maximum(x2A, 0)
+
+        alpha = self.par.alpha
+        util = x1A**alpha * x2A**(1 - alpha)
+        return util
 
     def utility_B(self,x1B,x2B):
-        par = self.par
-        return x1B**par.beta * x2B**(1 - par.beta)
+
+        ## Imposing restriction that demand can't be negative (utility would be a complex number, I think)
+        x1B=np.maximum(x1B, 0)
+        x2B=np.maximum(x2B, 0)
+
+        beta = self.par.beta
+        util = x1B**beta * x2B**(1 - beta)
+        return util
 
     def demand_A(self,p1):
         w1A, w2A = self.par.w1A, self.par.w2A
