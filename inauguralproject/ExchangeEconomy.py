@@ -1,4 +1,7 @@
 import numpy as np
+from types import SimpleNamespace
+
+
 
 class ExchangeEconomyClass:
     '''A class of two agents in an exchange economy that maximizes utililty based on (initial) endowments and preference parameters.
@@ -21,10 +24,15 @@ class ExchangeEconomyClass:
             w1A (float): A's endowment of good 1.
             w2A (float): A's endowment of good 2.
         '''
-        self.alpha = alpha
-        self.beta = beta
-        self.w1A = w1A
-        self.w2A = w2A
+
+        par = self.par = SimpleNamespace()
+
+        par.alpha = alpha
+        par.beta = beta
+        par.w1A = w1A
+        par.w2A = w2A
+        par.w1B = 1-w1A
+        par.w2B = 1-w2A
 
     def utility_A(self,x1A,x2A):
         '''
@@ -38,7 +46,9 @@ class ExchangeEconomyClass:
         float/int: Numeric utility value.
         '''
 
-        alpha = self.alpha
+        par = self.par
+
+        alpha = par.alpha
 
         util = x1A**alpha * x2A**(1 - alpha)
         return util
@@ -54,8 +64,11 @@ class ExchangeEconomyClass:
         Returns:
         float/int: Numeric utility value.
         '''
+
+        par = self.par
+
+        beta = par.beta
         
-        beta = self.beta
         util = x1B**beta * x2B**(1 - beta)
 
         return util
@@ -70,10 +83,17 @@ class ExchangeEconomyClass:
             x1A, X2A (tuple, float/int): Tuple of quantity demanded by agent B
         '''
         
-        w1A, w2A = self.w1A, self.w2A
-        alpha = self.alpha
+
+        par = self.par
+
+        w1A, w2A = par.w1A, par.w2A
+        alpha = par.alpha
         x1A = alpha * (w1A * p1 + w2A) / p1
         x2A = (1 - alpha) * (w1A * p1 + w2A)
+
+        # Ensuring Walras law applies
+        x1A = np.clip(x1A,0,1)
+        x2A = np.clip(x2A,0,1)
 
         return x1A, x2A
 
@@ -86,11 +106,16 @@ class ExchangeEconomyClass:
         Returns:
             x1B, X2B (tuple, float/int): Tuple of quantity demanded by agent B
         '''
-        
-        w1B, w2B = (1 - self.w1A), (1 - self.w2A)
-        beta = self.beta
+        par = self.par
+
+        w1B, w2B = (1 - par.w1A), (1 - par.w2A)
+        beta = par.beta
         x1B = beta * (w1B * p1 + w2B) / p1
         x2B = (1 - beta) * (w1B * p1 + w2B)
+
+        # Ensuring Walras law applies
+        x1B = np.clip(x1B,0,1)
+        x2B = np.clip(x2B,0,1)
 
         return x1B, x2B
 
@@ -102,12 +127,13 @@ class ExchangeEconomyClass:
             p1: float
                 The price used in the market.
         '''
+        par = self.par
 
         x1A,x2A = self.demand_A(p1)
         x1B,x2B = self.demand_B(p1)
 
-        eps1 = x1A-self.w1A + x1B-(1-self.w1A)
-        eps2 = x2A-self.w2A + x2B-(1-self.w2A)
+        eps1 = x1A-par.w1A + x1B-(1-par.w1A)
+        eps2 = x2A-par.w2A + x2B-(1-par.w2A)
 
         return eps1,eps2
     
