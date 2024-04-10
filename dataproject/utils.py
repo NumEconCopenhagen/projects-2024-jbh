@@ -58,7 +58,7 @@ def make_descrip_maps(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFra
         plt.Figure: A figure of county demographics (adjust variables if needed).
     '''
 
-    fig,ax = plt.subplots(2,1, figsize=(15,9))
+    fig,ax = plt.subplots(3,1, figsize=(18,12))
 
     gdf_counties.plot(ax=ax[0], color='grey', edgecolor='r')
     gdf_states.plot(ax=ax[0], color='none', edgecolor='k')
@@ -68,7 +68,7 @@ def make_descrip_maps(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFra
             legend_kwds={'label': "Bachelor degree or higher (%)",
                             'orientation': "horizontal",
                             "shrink":.2,
-                            'anchor': (0.35, 8.2)})
+                            'anchor': (0.35, 8.5)})
 
     gdf_counties.plot(ax=ax[1], color='none', edgecolor='r')
     gdf_states.plot(ax=ax[1], color='none', edgecolor='k')
@@ -78,14 +78,25 @@ def make_descrip_maps(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFra
             legend_kwds={'label': "Median household income in USD",
                             'orientation': "horizontal",
                             "shrink":.2,
-                            'anchor': (0.35, 8.2)})
+                            'anchor': (0.35, 8.5)})
+    
+    gdf_counties.plot(ax=ax[2], color='none', edgecolor='r')
+    gdf_states.plot(ax=ax[2], color='none', edgecolor='k')
+    gdf_counties.plot(column='Homeownership Rate', ax=ax[2],
+            cmap='viridis',
+            legend=True,
+            legend_kwds={'label': "Homeownership rate (%)",
+                            'orientation': "horizontal",
+                            "shrink":.2,
+                            'anchor': (0.35, 8.5)})
 
     fig.suptitle(f'{title}')
-    fig.text(0.3, 0.15, f'Note: This data covers the period 2010-2019.', fontsize=10)
+    fig.text(0.3, 0.1, f'Note: This data covers the period 2010-2019.', fontsize=10)
 
     fig.tight_layout()
     ax[0].set_axis_off()
     ax[1].set_axis_off()
+    ax[2].set_axis_off()
     plt.close()
     return fig
 
