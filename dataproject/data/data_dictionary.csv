@@ -1,4 +1,4 @@
-﻿ColumnName,Description
+ColumnName,Description
 REPORTER_DEA_NO,"Unique id of entity reporting shipments to DEA. Reporters must have unique id for each facility, so some reporters have multiple ids."
 REPORTER_BUS_ACT,"Type of business the reporter does, typically distributors or manufacturers."
 REPORTER_NAME,Name of entity reporting shipments to the DEA.
@@ -41,3 +41,4 @@ Combined_Labeler_Name,"Cleaned and combined name of entity that manufactured, di
 Revised_Company_Name,Cleaned and combined version of Combined_Labeler_Name
 Reporter_family,Cleaned and combined version of REPORTER_NAME.
 dos_str,Strength of dose in milligrams.
+geoid,FIPS-code of county
