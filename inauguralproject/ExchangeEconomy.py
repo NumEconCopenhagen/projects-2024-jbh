@@ -124,8 +124,9 @@ class ExchangeEconomyClass:
         Calculates the error in market clearing when based on demands that clears the market.
 
         Args:
-            p1: float
-                The price used in the market.
+            p1 (float/int): The price used in the market.
+        Returns:
+            eps1, eps2 (tuple(float)): Tuple of market errors
         '''
         par = self.par
 
@@ -142,19 +143,20 @@ class ExchangeEconomyClass:
         Based on market clearing error. This calculates the price that clears the market, but with lowest market clearing error.
 
         Args:
-            P_1: np.ndarray
-                Vector of possible prices.
+            P_1 (np.ndarray): Vector of possible prices.
+        Returns:
+            p_1 (float/int): Returns scalar of price that clears the market.
         '''
         eps_1,eps_2=self.market_clear_err(P_1)
 
         # Make a vector with difference between errors in markets
-        EPS = eps_1-eps_2
+        EPS = abs(eps_1)+abs(eps_2)
 
         # Use python-built in functions to find the minimum absolute error
-        minerr=abs(EPS).min()
+        minerr=EPS.min()
 
         # Make vector indices to pass to price vector
-        ids=abs(EPS)==minerr
+        ids=EPS==minerr
 
         # Calculate market clearing price of price in P_1
         market_clearing_p=P_1[ids][0]

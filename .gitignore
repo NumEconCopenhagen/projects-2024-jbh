@@ -128,6 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Inaugural project ignores
+inauguralproject/misc
+
 # Data project ignores
 dataproject/data/raw
 dataproject/data/arcos*.pq

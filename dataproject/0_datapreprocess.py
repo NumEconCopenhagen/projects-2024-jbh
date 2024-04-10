@@ -1,15 +1,19 @@
 import polars as pl
 import geopandas as gpd
 import pandas as pd
+##############################################################################################################
+#### Below is code for converting the "raw" ARCOS data to .parquet to save on space and speed up code ########
+##############################################################################################################
 
-# This takes the raw ARCOS dataset from Washington Post and converts to .parquet format to save on space
-lf = (pl.scan_csv('data/raw/arcos_all_washpost.tsv', separator='\t', dtypes={'TRANSACTION_DATE':pl.String, 'REPORTER_BUS_ACT':pl.Categorical, 'REPORTER_ZIP':pl.String, 'BUYER_BUS_ACT':pl.Categorical, 'BUYER_STATE':pl.Categorical, 'TRANSACTION_CODE':pl.Categorical, 'BUYER_ZIP':pl.String, 'DRUG_CODE':pl.Categorical, 'NDC_NO':pl.String, 'DRUG_NAME':pl.Categorical, 'TRANSACTION_ID':pl.String, 'Measure':pl.Categorical, 'Product_Name': pl.Categorical, 'Ingredient_Name': pl.Categorical}, ignore_errors=True)
-      .select(pl.all().name.to_lowercase())
-      .with_columns(pl.col("transaction_date").str.pad_start(8, '0'))
-      .with_columns(pl.col("transaction_date").str.to_date(format='%m%d%Y'))
-      .select(pl.all().shrink_dtype())
-)
-lf.sink_parquet('data/raw/arcos_all_washpost.pq')
+# lf_all = (pl.scan_csv('data/raw/arcos_all_washpost.tsv', separator='\t', dtypes={'TRANSACTION_DATE':pl.String, 'REPORTER_BUS_ACT':pl.Categorical, 'REPORTER_ZIP':pl.String, 'BUYER_BUS_ACT':pl.Categorical, 'BUYER_STATE':pl.Categorical, 'TRANSACTION_CODE':pl.Categorical, 'BUYER_ZIP':pl.String, 'DRUG_CODE':pl.Categorical, 'NDC_NO':pl.String, 'DRUG_NAME':pl.Categorical, 'TRANSACTION_ID':pl.String, 'Measure':pl.Categorical, 'Product_Name': pl.Categorical, 'Ingredient_Name': pl.Categorical}, ignore_errors=True)
+#       .select(pl.all().name.to_lowercase())
+#       .with_columns(pl.col("transaction_date").str.pad_start(8, '0'))
+#       .with_columns(pl.col("transaction_date").str.to_date(format='%m%d%Y'))
+#       .select(pl.all().shrink_dtype())
+# )
+# lf_all.sink_parquet('data/raw/arcos_all_washpost.pq')
+
+lf_all = pl.scan_parquet('data/raw/arcos_all_washpost.pq')
 
 # Filtering for the Central Appalachian states:
 ## VA: Virginia, WV: West Virginia, KY: Kentucky, TN: Tennessee, NC: North Carolina.
@@ -24,9 +28,9 @@ appa_count_list = pl.read_csv('data/appalachia_fips.csv')['fipschar'].cast(pl.St
 gdf_counties = gpd.read_file('data/raw/tl_2019_us_county/tl_2019_us_county.shp')
 gdf_counties.columns = [name.lower() for name in gdf_counties.columns]
 gdf_counties = gdf_counties[['statefp', 'countyfp', 'geoid', 'name', 'namelsad', 'geometry']]
-gdf_counties = gdf_counties[gdf_counties['statefp'].isin(states_fips)]
-gdf_counties = gdf_counties[gdf_counties['geoid'].isin(appa_count_list)]
-gdf_counties.reset_index(drop=True).to_parquet('data/us_appa_counties.pq')
+gdf_counties_appa = gdf_counties[gdf_counties['statefp'].isin(states_fips)]
+gdf_counties_appa = gdf_counties_appa[gdf_counties_appa['geoid'].isin(appa_count_list)]
+gdf_counties_appa.reset_index(drop=True).to_parquet('data/us_appa_counties.pq')
 
 # Do the same, but filter for states
 gdf_states = gpd.read_file('data/raw/cb_2018_us_state_500k.shp')
@@ -35,37 +39,48 @@ gdf_states = gdf_states[gdf_states['statefp'].isin(states_fips)]
 gdf_states.reset_index(drop=True).to_parquet('data/us_appa_states.pq')
 
 # Filter for those pharmacies in the Central Appalachians
-df_pharm = pd.read_csv('data/pharmacies_latlon.csv')
+df_pharm = (pl.read_csv('data/raw/pharmacies_latlon14.csv')
+      .select(pl.all().name.to_lowercase())
+      .to_pandas()
+)
+
 gdf_pharm = gpd.GeoDataFrame(
     df_pharm, geometry=gpd.points_from_xy(df_pharm.lon, df_pharm.lat), crs=gdf_counties.crs
 )
 
 gdf_pharm=gdf_pharm.sjoin(gdf_counties[['geometry', 'geoid']], predicate='within').reset_index(drop=True)
+# Which type of pharmacy --> add it to pharmacy data
+df_pharm_type = lf_all.select(pl.col("buyer_dea_no", 'buyer_bus_act')).unique().collect().to_pandas()
+gdf_pharm=gdf_pharm.merge(df_pharm_type, on='buyer_dea_no')
 gdf_pharm.to_parquet('data/pharmacies_latlon.pq')
 
 # Data on pharmacies (https://github.com/wpinvestigative/arcos-api/blob/master/data/pharmacies_latlon14.csv)
-df_pharm = (pl.read_csv('data/raw/pharmacies_latlon14.csv')
-      .select(pl.all().name.to_lowercase())
-      .filter(pl.col("buyer_state").is_in(states))
-)
-list_of_buyers_in_appa = df_pharm.select(pl.col("buyer_dea_no")).to_series().to_list()
+list_of_buyers_in_appa = gdf_pharm[gdf_pharm['geoid'].isin(appa_count_list)]['buyer_dea_no'].to_list()
 
 # Reduce dimensionality of ARCOS dataset
 ## Filter for Central Appalachian states
 ## Filter for 2009-2011
 ## Filter for pharmacies in the buyer data
+## Add county ("geoid") identifier 
+
+lf_pharm = pl.scan_parquet('data/pharmacies_latlon.pq').select(pl.col("buyer_dea_no", "geoid"))
 
 years = [2009, 2010, 2011]
-lf = (pl.scan_parquet('data/raw/arcos_all_washpost.pq')
+lf_appa = (pl.scan_parquet('data/raw/arcos_all_washpost.pq')
       .select(pl.col("reporter_dea_no", 'buyer_dea_no', 'buyer_bus_act', 'buyer_state', 'drug_code', 'drug_name', 'mme_conversion_factor', 'quantity', 'transaction_code', 'transaction_date', 'calc_base_wt_in_gm', 'dosage_unit', 'product_name', 'ingredient_name', 'revised_company_name', 'dos_str'))
       .filter(pl.col("buyer_state").is_in(states))
       .filter(pl.col("transaction_date").dt.year().is_in(years))
       .filter(pl.col("buyer_dea_no").is_in(list_of_buyers_in_appa))
+      .join(lf_pharm, left_on='buyer_dea_no', right_on='buyer_dea_no')
 )
-lf.sink_parquet('data/arcos_appa.pq')
 
-# Which type of pharmacy --> add it to pharmacy data
-df_pharm_type = lf.select(pl.col("buyer_dea_no", 'buyer_bus_act')).unique().collect()
+lf_appa.sink_parquet('data/arcos_appa.pq')
 
-df_pharm=df_pharm.join(df_pharm_type, left_on='buyer_dea_no', right_on='buyer_dea_no')
-df_pharm.write_csv('data/pharmacies_latlon.csv')
+years = [2008, 2009, 2010, 2011]
+lf_flo = (pl.scan_parquet('data/raw/arcos_all_washpost.pq')
+      .select(pl.col("reporter_dea_no", 'buyer_dea_no', 'buyer_bus_act', 'buyer_state', 'drug_code', 'drug_name', 'mme_conversion_factor', 'quantity', 'transaction_code', 'transaction_date', 'calc_base_wt_in_gm', 'dosage_unit', 'product_name', 'ingredient_name', 'revised_company_name', 'dos_str'))
+      .filter(pl.col("buyer_state") == 'FL')
+      .filter(pl.col("transaction_date").dt.year().is_in(years))
+      .join(lf_pharm, left_on='buyer_dea_no', right_on='buyer_dea_no')
+)
+lf_flo.sink_parquet('data/arcos_flo.pq')
