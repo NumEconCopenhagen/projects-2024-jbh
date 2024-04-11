@@ -28,13 +28,23 @@ appa_count_list = pl.read_csv('data/appalachia_fips.csv')['fipschar'].cast(pl.St
 gdf_counties = gpd.read_file('data/raw/tl_2019_us_county/tl_2019_us_county.shp')
 gdf_counties.columns = [name.lower() for name in gdf_counties.columns]
 gdf_counties = gdf_counties[['statefp', 'countyfp', 'geoid', 'name', 'namelsad', 'geometry']]
+
+# Save all US counties 
+gdf_counties.to_parquet('data/us_counties.pq')
+
+# Save Appalachians
 gdf_counties_appa = gdf_counties[gdf_counties['statefp'].isin(states_fips)]
 gdf_counties_appa = gdf_counties_appa[gdf_counties_appa['geoid'].isin(appa_count_list)]
 gdf_counties_appa.reset_index(drop=True).to_parquet('data/us_appa_counties.pq')
 
-# Do the same, but filter for states
+# Do the same, but look at states
 gdf_states = gpd.read_file('data/raw/cb_2018_us_state_500k.shp')
 gdf_states.columns = [name.lower() for name in gdf_states.columns]
+
+# Save all US states 
+gdf_states.to_parquet('data/us_states.pq')
+
+# Save Appalachians
 gdf_states = gdf_states[gdf_states['statefp'].isin(states_fips)]
 gdf_states.reset_index(drop=True).to_parquet('data/us_appa_states.pq')
 
