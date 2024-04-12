@@ -192,7 +192,7 @@ def make_descrip_maps_shipment_single(gdf_counties: gpd.GeoDataFrame, gdf_states
         plt.Figure: A figure of county shipments (adjust variables if needed).
     '''
 
-    fig,ax = plt.subplots(figsize=(8,7))
+    fig,ax = plt.subplots(figsize=(10,8))
 
     gdf_counties.plot(ax=ax, color='none', edgecolor='grey')
     gdf_states.plot(ax=ax, color='none', edgecolor='k')
