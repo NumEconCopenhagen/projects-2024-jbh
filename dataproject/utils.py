@@ -60,9 +60,9 @@ def make_descrip_maps(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFra
 
     fig,ax = plt.subplots(3,1, figsize=(18,12))
 
-    gdf_counties.plot(ax=ax, color='none', edgecolor='grey')
-    gdf_states.plot(ax=ax, color='none', edgecolor='k')
-    gdf_counties.plot(column="Bachelor's Degree or Higher", ax=ax,
+    gdf_counties.plot(ax=ax[0], color='none', edgecolor='grey')
+    gdf_states.plot(ax=ax[0], color='none', edgecolor='k')
+    gdf_counties.plot(column="Bachelor's Degree or Higher", ax=ax[0],
             cmap='viridis',
             alpha=0.8,
             legend=True,
@@ -97,7 +97,7 @@ def make_descrip_maps(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFra
     fig.text(0.3, 0.1, f'Note: This data covers the period 2010-2019.', fontsize=10)
 
     fig.tight_layout()
-    ax.set_axis_off()
+    ax[0].set_axis_off()
     ax[1].set_axis_off()
     ax[2].set_axis_off()
     plt.close()
