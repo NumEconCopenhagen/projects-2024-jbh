@@ -60,30 +60,33 @@ def make_descrip_maps(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFra
 
     fig,ax = plt.subplots(3,1, figsize=(18,12))
 
-    gdf_counties.plot(ax=ax[0], color='grey', edgecolor='r')
-    gdf_states.plot(ax=ax[0], color='none', edgecolor='k')
-    gdf_counties.plot(column="Bachelor's Degree or Higher", ax=ax[0],
+    gdf_counties.plot(ax=ax, color='none', edgecolor='grey')
+    gdf_states.plot(ax=ax, color='none', edgecolor='k')
+    gdf_counties.plot(column="Bachelor's Degree or Higher", ax=ax,
             cmap='viridis',
+            alpha=0.8,
             legend=True,
             legend_kwds={'label': "Bachelor degree or higher (%)",
                             'orientation': "horizontal",
                             "shrink":.2,
                             'anchor': (0.35, 8.5)})
 
-    gdf_counties.plot(ax=ax[1], color='none', edgecolor='r')
+    gdf_counties.plot(ax=ax[1], color='none', edgecolor='grey')
     gdf_states.plot(ax=ax[1], color='none', edgecolor='k')
     gdf_counties.plot(column='Median Household Income', ax=ax[1],
             cmap='viridis',
+            alpha=0.8,
             legend=True,
             legend_kwds={'label': "Median household income in USD",
                             'orientation': "horizontal",
                             "shrink":.2,
                             'anchor': (0.35, 8.5)})
     
-    gdf_counties.plot(ax=ax[2], color='none', edgecolor='r')
+    gdf_counties.plot(ax=ax[2], color='none', edgecolor='grey')
     gdf_states.plot(ax=ax[2], color='none', edgecolor='k')
     gdf_counties.plot(column='Homeownership Rate', ax=ax[2],
             cmap='viridis',
+            alpha=0.8,
             legend=True,
             legend_kwds={'label': "Homeownership rate (%)",
                             'orientation': "horizontal",
@@ -94,9 +97,119 @@ def make_descrip_maps(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFra
     fig.text(0.3, 0.1, f'Note: This data covers the period 2010-2019.', fontsize=10)
 
     fig.tight_layout()
+    ax.set_axis_off()
+    ax[1].set_axis_off()
+    ax[2].set_axis_off()
+    plt.close()
+    return fig
+
+def make_descrip_maps_shipment(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFrame, title='') -> plt.Figure:
+    '''
+    Pass two GeoDataFrames, one at the county level and one at the state level. 
+    Note that the county GeoDataFrame should have info merged to it (see above).
+
+    Args:
+        gdf_counties (gpd.GeoDataFrame): County GeoDataFrame. 
+        gdf_states (gpd.GeoDataFrame): State GeoDataFrame (only for state borders). 
+        title (str): String to give the figure a fitting title.
+
+    Returns:
+        plt.Figure: A figure of county shipments (adjust variables if needed).
+    '''
+
+    fig,ax = plt.subplots(3,1, figsize=(18,12))
+
+    gdf_counties.plot(ax=ax[0], color='none', edgecolor='grey')
+    gdf_states.plot(ax=ax[0], color='none', edgecolor='k')
+    gdf_counties[gdf_counties['date_labels']=='2009'].plot(column="MME_p_cap", ax=ax[0],
+            cmap='plasma',
+            alpha=0.8,
+            legend=True,
+            legend_kwds={'label': "Opioids (grams) shipped per county per capita (2009)",
+                            'orientation': "horizontal",
+                            "shrink":.2,
+                            'anchor': (0.38, 8.8)})
+
+
+    gdf_counties.plot(ax=ax[1], color='none', edgecolor='grey')
+    gdf_states.plot(ax=ax[1], color='none', edgecolor='k')
+    gdf_counties[gdf_counties['date_labels']=='2010'].plot(column="MME_p_cap", ax=ax[1],
+            cmap='plasma',
+            alpha=0.8,
+            legend=True,
+            legend_kwds={'label': "Opioids (grams) shipped per county per capita (2010)",
+                            'orientation': "horizontal",
+                            "shrink":.2,
+                            'anchor': (0.38, 8.8)})
+    
+    gdf_counties.plot(ax=ax[2], color='none', edgecolor='grey')
+    gdf_states.plot(ax=ax[2], color='none', edgecolor='k')
+    gdf_counties[gdf_counties['date_labels']=='2011'].plot(column="MME_p_cap", ax=ax[2],
+            cmap='plasma',
+            alpha=0.8,
+            legend=True,
+            legend_kwds={'label': "Opioids (grams) shipped per county per capita (2011)",
+                            'orientation': "horizontal",
+                            "shrink":.2,
+                            'anchor': (0.38, 8.8)})
+
+    fig.suptitle(f'{title}')
+    fig.text(0.3, 0.1, f'Note: Weight of opioids is scaled by the morphine equivalent factor, see data description.', fontsize=10)
+
+    fig.tight_layout()
     ax[0].set_axis_off()
     ax[1].set_axis_off()
     ax[2].set_axis_off()
+    plt.close()
+    return fig
+
+def make_helper_quarter_col(repeat: int) -> pl.DataFrame:
+    # Generate numbers 1 to 4
+    numbers = list(range(1, 5))
+
+    # Repeat the numbers
+    repeated_numbers = numbers * repeat  # Repeat x times
+
+    # Create a Polars DataFrame
+    df = pl.DataFrame({
+        'repeated_numbers': repeated_numbers
+    }).cast(pl.String)
+
+    return df
+
+
+def make_descrip_maps_shipment_single(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFrame,title='') -> plt.Figure:
+    '''
+    Pass two GeoDataFrames, one at the county level and one at the state level. 
+    Note that the county GeoDataFrame should have info merged to it (see above).
+
+    Args:
+        gdf_counties (gpd.GeoDataFrame): County GeoDataFrame. 
+        gdf_states (gpd.GeoDataFrame): State GeoDataFrame (only for state borders). 
+        title (str): String to give the figure a fitting title.
+
+    Returns:
+        plt.Figure: A figure of county shipments (adjust variables if needed).
+    '''
+
+    fig,ax = plt.subplots(figsize=(10,8))
+
+    gdf_counties.plot(ax=ax, color='none', edgecolor='grey')
+    gdf_states.plot(ax=ax, color='none', edgecolor='k')
+    gdf_counties[gdf_counties['date_labels']=='2010'].plot(column="MME_p_cap", ax=ax,
+            cmap='plasma',
+            alpha=0.8,
+            legend=True,
+            legend_kwds={'label': "Opioids (grams) shipped per county per capita (2010)",
+                            'orientation': "horizontal",
+                            "shrink":.3,
+                            'anchor': (0.2, 7)})
+    
+
+    fig.suptitle(f'{title}')
+    fig.tight_layout()
+    ax.set_axis_off()
+    
     plt.close()
     return fig
 
