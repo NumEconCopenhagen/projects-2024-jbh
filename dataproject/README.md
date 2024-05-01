@@ -13,7 +13,12 @@ I find that shipments do not seem to drop. Interestingly, I also find that some 
 I have included all dependencies in the `env.yaml`-file. To replicate this repository, kindly do the following:
 1) Clone this repository.
 2) Open your `conda`/`mamba` prompt.
-3) Install from the `env.yaml`-file by writing: `conda env create -f env.yaml`
+3) Install from the `env.yaml`-file by writing: `conda env create -f env.yaml`.
+
+Alternatively, you can install the following dependencies (assuming you have a standard python installation with the Anaconda distribution):
+- ```pip install seaborn gdown polars geopandas py-markdown-table``
+
+Note that this may break dependencies for other packages if you install in your ``base`` conda/mamba environment. 
 
 ## Attribution
 I draw on some of the data processing done by Washington Post found [here](https://github.com/wpinvestigative/arcos-api). I thank them for making their datasets publicly available.

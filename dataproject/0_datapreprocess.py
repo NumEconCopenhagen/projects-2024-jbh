@@ -54,17 +54,21 @@ df_pharm = (pl.read_csv('data/raw/pharmacies_latlon14.csv')
       .to_pandas()
 )
 
+# From the pharmacy location dataset, make it to a GeoDataFrame
 gdf_pharm = gpd.GeoDataFrame(
     df_pharm, geometry=gpd.points_from_xy(df_pharm.lon, df_pharm.lat), crs=gdf_counties.crs
 )
+# Add county identifiers
 
 gdf_pharm=gdf_pharm.sjoin(gdf_counties[['geometry', 'geoid']], predicate='within').reset_index(drop=True)
-# Which type of pharmacy --> add it to pharmacy data
+
+# Which type of pharmacy? We can only see that from the large "main" dataset --> nice to have this separately from the main dataset, so I add it
 df_pharm_type = lf_all.select(pl.col("buyer_dea_no", 'buyer_bus_act')).unique().collect().to_pandas()
 gdf_pharm=gdf_pharm.merge(df_pharm_type, on='buyer_dea_no')
 gdf_pharm.to_parquet('data/pharmacies_latlon.pq')
 
-# Data on pharmacies (https://github.com/wpinvestigative/arcos-api/blob/master/data/pharmacies_latlon14.csv)
+# Make list of unique pharmacies ("buyers") in the Appalachians. Filter main dataset for this
+# (https://github.com/wpinvestigative/arcos-api/blob/master/data/pharmacies_latlon14.csv)
 list_of_buyers_in_appa = gdf_pharm[gdf_pharm['geoid'].isin(appa_count_list)]['buyer_dea_no'].to_list()
 
 # Reduce dimensionality of ARCOS dataset
@@ -86,6 +90,7 @@ lf_appa = (pl.scan_parquet('data/raw/arcos_all_washpost.pq')
 
 lf_appa.sink_parquet('data/arcos_appa.pq')
 
+# Data for Florida 
 years = [2008, 2009, 2010, 2011]
 lf_flo = (pl.scan_parquet('data/raw/arcos_all_washpost.pq')
       .select(pl.col("reporter_dea_no", 'buyer_dea_no', 'buyer_bus_act', 'buyer_state', 'drug_code', 'drug_name', 'mme_conversion_factor', 'quantity', 'transaction_code', 'transaction_date', 'calc_base_wt_in_gm', 'dosage_unit', 'product_name', 'ingredient_name', 'revised_company_name', 'dos_str'))

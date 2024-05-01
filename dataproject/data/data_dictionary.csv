@@ -10,7 +10,7 @@ REPORTER_STATE,State of entity reporting shipments to the DEA.
 REPORTER_ZIP,Zip code of entity reporting shipments to the DEA.
 REPORTER_COUNTY,County of entity reporting shipments to the DEA.
 BUYER_DEA_NO,Unique id of entity receiving shipments from reporter.
-BUYER_BUS_ACT,"Type of business the reporter does. Our data set limits to retail pharmacies, chain pharmacies and types of practitioners, though full data set includes more including mail order pharmacies, hospitals and distributors, among others."
+BUYER_BUS_ACT,"Type of business the reporter does. WashPost data set is limited to retail pharmacies, chain pharmacies and types of practitioners, though full data set includes more including mail order pharmacies, hospitals and distributors, among others."
 BUYER_NAME,Name of entity receiving shipments from reporter.
 BUYER_ADDL_CO_INFO,Additional company information for entity receiving shipments from reporter.
 BUYER_ADDRESS1,Address of entity receiving shipments from reporter.

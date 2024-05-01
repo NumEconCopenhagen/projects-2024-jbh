@@ -135,3 +135,6 @@ inauguralproject/misc
 dataproject/data/raw
 dataproject/data/arcos*.pq
 dataproject/data/us*.pq
+
+# Ignore feedback template
+feedback_template.md

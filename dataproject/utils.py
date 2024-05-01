@@ -2,8 +2,9 @@ import polars as pl
 import matplotlib.pyplot as plt
 import geopandas as gpd
 from data import county_demographics
+from py_markdown_table.markdown_table import markdown_table
 
-def pull_meta_data(cols: list) -> dict:
+def pull_meta_data(cols: list[str]) -> dict:
     '''
     Pass a list of column names (list of strings) to get the data description.
 
@@ -22,11 +23,11 @@ def pull_meta_data(cols: list) -> dict:
     col_names = cols_meta.select(pl.col("ColumnName")).to_series().to_list()
     col_names_descrip = cols_meta.select(pl.col("Description")).to_series().to_list()
 
-    cols_description={col: name for col,name in zip(col_names, col_names_descrip)}
+    cols_description=[{'Name': col, 'Description': name} for col,name in zip(col_names, col_names_descrip)]
 
-    return cols_description
+    return print(markdown_table(cols_description).set_params(multiline = {'Name': 25, 'Description': 90}).get_markdown())
 
-def fetch_county_demographics(states: list, states_fips: list, gdf_counties: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def fetch_county_demographics(states: list[str], states_fips: list[str], gdf_counties: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
     Pass a list of state names and FIPS-codes along with GeoDataFrame of relevant counties to fetch demographic info at the county level.
 
@@ -178,7 +179,7 @@ def make_helper_quarter_col(repeat: int) -> pl.DataFrame:
     return df
 
 
-def make_descrip_maps_shipment_single(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFrame,title='') -> plt.Figure:
+def make_descrip_maps_shipment_single(gdf_counties: gpd.GeoDataFrame, gdf_states: gpd.GeoDataFrame, title='') -> plt.Figure:
     '''
     Pass two GeoDataFrames, one at the county level and one at the state level. 
     Note that the county GeoDataFrame should have info merged to it (see above).
