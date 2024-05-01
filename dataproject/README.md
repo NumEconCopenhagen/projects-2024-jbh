@@ -16,7 +16,7 @@ I have included all dependencies in the `env.yaml`-file. To replicate this repos
 3) Install from the `env.yaml`-file by writing: `conda env create -f env.yaml`.
 
 Alternatively, you can install the following dependencies (assuming you have a standard python installation with the Anaconda distribution):
-- ``pip install seaborn gdown polars geopandas py-markdown-table`
+- `pip install seaborn gdown polars geopandas py-markdown-table`
 
 Note that this may break dependencies for other packages if you install in your `base` conda/mamba environment. 
 
