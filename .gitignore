@@ -138,3 +138,6 @@ dataproject/data/us*.pq
 
 # Ignore feedback template
 feedback_template.md
+
+# Model sandbox
+modelproject/sandbox
