@@ -43,7 +43,7 @@ def v2_func(c2, rho, gamma, m2, kappa):
     beq = gamma*(m2-c2+kappa)**(1-rho)/(1-rho)
     return cons+beq
 
-def v1_func(c1, m1, rho, beta, r, delta, v2_interp_func):
+def v1_func(c1, m1, rho, beta, r, delta, v2_interp_func, p):
 
     y2_low = 1-delta
     y2_high = 1+delta
@@ -55,11 +55,11 @@ def v1_func(c1, m1, rho, beta, r, delta, v2_interp_func):
     exp_v2_high = v2_interp_func([m2_high])[0]
 
     # total expected value in v2
-    total = 0.5 * exp_v2_low + 0.5 * exp_v2_high
+    total = p * exp_v2_high + (1-p) * exp_v2_low
 
     return utility_crra(c1, rho) + beta*total
 
-def v1_func_stoch(c1, m1, rho, beta, r, delta, v2_interp_func):
+def v1_func_stoch(c1, m1, rho, beta, r, sigma, v2_interp_func, p):
 
     m2_low = (1+r)*(m1-c1)*(1-sigma)
     m2_high = (1+r)*(m1-c1)*(1+sigma)
@@ -68,7 +68,7 @@ def v1_func_stoch(c1, m1, rho, beta, r, delta, v2_interp_func):
     exp_v2_high = v2_interp_func([m2_high])[0]
 
     # total expected value in v2
-    total = delta * exp_v2_low + (1-delta) * exp_v2_high
+    total = p * exp_v2_high + (1-p)*exp_v2_low
 
     return utility_crra(c1, rho) + beta*total
 
@@ -77,7 +77,7 @@ def interp(m_grid, v_grid):
                                                     bounds_error=False,fill_value=None)
     return func
 
-def solve_period_1(rho, beta, r, delta, v2_interp_func, v1):
+def solve_period_1(rho, beta, r, delta, v2_interp_func, v1, p):
     
     m1_grid = np.linspace(1e-8,4,100)
     v1_grid = np.empty(100)
@@ -87,7 +87,7 @@ def solve_period_1(rho, beta, r, delta, v2_interp_func, v1):
     for i,m1 in enumerate(m1_grid):
         
         # Defining obj func
-        obj = lambda c1: -v1(c1, m1, rho, beta, r, delta, v2_interp_func)
+        obj = lambda c1: -v1(c1, m1, rho, beta, r, delta, v2_interp_func, p)
                 
         # Optimize bounded
         result = optimize.minimize_scalar(obj, method='bounded',bounds=(1e-8,m1))
@@ -120,7 +120,7 @@ def solve_period_2(rho, kappa, gamma):
      
     return m2_grid, v2_grid, c2_grid
 
-def solvez(rho, kappa, gamma, beta, r, delta, v1):
+def solvez(rho, kappa, gamma, beta, r, delta, p, v1):
     
     # Solving for period 2
     m2_grid, v2_grid, c2_grid = solve_period_2(rho, kappa, gamma)
@@ -129,24 +129,52 @@ def solvez(rho, kappa, gamma, beta, r, delta, v1):
     v2_interp_func = interp(m2_grid, v2_grid)
 
     # Solving for period 1
-    m1_grid, v1_grid, c1_grid = solve_period_1(rho, beta, r, delta, v2_interp_func, v1)
+    m1_grid, v1_grid, c1_grid = solve_period_1(rho, beta, r, delta, v2_interp_func, v1, p)
     
     return m1_grid, c1_grid, m2_grid, c2_grid
 
 
-def solve_period_1_stoch(rho, beta, r, delta, v2_interp_func, v1):
+def solvez_stoch(rho, kappa, gamma, beta, sigma_low, sigma_high, r, p, v1):
     
-    m1_grid = np.linspace(1e-8,4,100)
-    v1_grid = np.empty(100)
-    c1_grid = np.empty(100)
+    # Solving for period 2
+    m2_grid, v2_grid, c2_grid = solve_period_2(rho, kappa, gamma)
+
+    # Interpolator
+    v2_interp_func = interp(m2_grid, v2_grid)
+
+    # Solving for period 1
+    m1_grid, v1_grid, c1_grid = solve_period_1_stoch(rho, beta, r, v2_interp_func, sigma_low, sigma_high, v1, p)
+    
+    return m1_grid, c1_grid, m2_grid, c2_grid
+
+
+def solvez_stoch_norm(rho, kappa, gamma, beta, r, p, v1):
+    
+    # Solving for period 2
+    m2_grid, v2_grid, c2_grid = solve_period_2(rho, kappa, gamma)
+
+    # Interpolator
+    v2_interp_func = interp(m2_grid, v2_grid)
+
+    # Solving for period 1
+    m1_grid, v1_grid, c1_grid = solve_period_1_stoch_norm(rho, beta, r, v2_interp_func, v1, p)
+    
+    return m1_grid, c1_grid, m2_grid, c2_grid
+
+
+def solve_period_1_stoch(rho, beta, r, v2_interp_func, sigma_low, sigma_high, v1, p):
+    
+    m1_grid = np.linspace(1e-8,5,300)
+    v1_grid = np.empty(300)
+    c1_grid = np.empty(300)
 
     # For each m1 in grid
     for i,m1 in enumerate(m1_grid):
         
-        sigma = np.random.uniform(0.01, 0.5)
+        sigma = np.random.uniform(sigma_low, sigma_high)
 
         # Defining obj func
-        obj = lambda c1: -v1(c1, m1, rho, beta, r, sigma, v2_interp_func)
+        obj = lambda c1: -v1(c1, m1, rho, beta, r, sigma, v2_interp_func, p)
                 
         # Optimize bounded
         result = optimize.minimize_scalar(obj, method='bounded',bounds=(1e-8,m1))
@@ -155,4 +183,31 @@ def solve_period_1_stoch(rho, beta, r, delta, v2_interp_func, v1):
         v1_grid[i] = -result.fun
         c1_grid[i] = result.x
      
+    c1_grid[c1_grid<0]=0
+
+    return m1_grid,v1_grid,c1_grid
+
+def solve_period_1_stoch_norm(rho, beta, r, v2_interp_func, v1, p):
+    
+    m1_grid = np.linspace(1e-8,5,300)
+    v1_grid = np.empty(300)
+    c1_grid = np.empty(300)
+
+    # For each m1 in grid
+    for i,m1 in enumerate(m1_grid):
+        
+        sigma = np.fmax(np.random.normal(0.3,0.1,size=1),0)
+
+        # Defining obj func
+        obj = lambda c1: -v1(c1, m1, rho, beta, r, sigma, v2_interp_func, p)
+                
+        # Optimize bounded
+        result = optimize.minimize_scalar(obj, method='bounded',bounds=(1e-8,m1))
+        
+        # Save results
+        v1_grid[i] = -result.fun
+        c1_grid[i] = result.x
+     
+    c1_grid[c1_grid<0]=0
+    
     return m1_grid,v1_grid,c1_grid
