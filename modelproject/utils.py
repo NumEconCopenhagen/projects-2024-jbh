@@ -120,6 +120,40 @@ def solve_period_2(rho, kappa, gamma):
      
     return m2_grid, v2_grid, c2_grid
 
+def solve_period_1_no_risk(rho, beta, r, v2_interp_func, v1):
+    
+    m1_grid = np.linspace(1e-8,4,300)
+    v1_grid = np.empty(300)
+    c1_grid = np.empty(300)
+
+    # For each m1 in grid
+    for i,m1 in enumerate(m1_grid):
+        
+        # Defining obj func
+        obj = lambda c1: -v1(c1, m1, rho, beta, r, v2_interp_func)
+                
+        # Optimize bounded
+        result = optimize.minimize_scalar(obj, method='bounded',bounds=(1e-8,m1))
+        
+        # Save results
+        v1_grid[i] = -result.fun
+        c1_grid[i] = result.x
+     
+    return m1_grid,v1_grid,c1_grid
+
+def solvez_no_risk(rho, kappa, gamma, beta, r, v1):
+    
+    # Solving for period 2
+    m2_grid, v2_grid, c2_grid = solve_period_2(rho, kappa, gamma)
+
+    # Interpolator
+    v2_interp_func = interp(m2_grid, v2_grid)
+
+    # Solving for period 1
+    m1_grid, v1_grid, c1_grid = solve_period_1_no_risk(rho, beta, r, v2_interp_func, v1)
+    
+    return m1_grid, c1_grid, m2_grid, c2_grid
+
 def solvez(rho, kappa, gamma, beta, r, delta, p, v1):
     
     # Solving for period 2
