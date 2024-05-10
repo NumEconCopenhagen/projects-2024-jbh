@@ -17,23 +17,6 @@ def solve_cons_crra(m1, r, beta, rho):
 
     return c1_star, c2_star
 
-# def solve_cons_log(m1, r, beta):
-    
-#     # Objective func
-#     obj = lambda c1: (beta/(c1-m1))+1/c1
-
-#     guess = m1/2
-
-#     # Solver
-#     res = optimize.root_scalar(obj, x0=guess, method='newton')
-#     c1_star = res.root
-
-#     # Based on c1, we can calculate c2
-#     c2_star = (1+r)*(m1-c1_star)
-
-#     return round(c1_star,3), round(c2_star,3)
-
-
 def utility_crra(c1, rho):
     util = (c1**(1-rho))/(1-rho)
     return util
@@ -167,7 +150,6 @@ def solvez(rho, kappa, gamma, beta, r, delta, p, v1):
     
     return m1_grid, c1_grid, m2_grid, c2_grid
 
-
 def solvez_stoch(rho, kappa, gamma, beta, sigma_low, sigma_high, r, p, v1):
     
     # Solving for period 2
@@ -180,21 +162,6 @@ def solvez_stoch(rho, kappa, gamma, beta, sigma_low, sigma_high, r, p, v1):
     m1_grid, v1_grid, c1_grid = solve_period_1_stoch(rho, beta, r, v2_interp_func, sigma_low, sigma_high, v1, p)
     
     return m1_grid, c1_grid, m2_grid, c2_grid
-
-
-def solvez_stoch_norm(rho, kappa, gamma, beta, r, p, v1):
-    
-    # Solving for period 2
-    m2_grid, v2_grid, c2_grid = solve_period_2(rho, kappa, gamma)
-
-    # Interpolator
-    v2_interp_func = interp(m2_grid, v2_grid)
-
-    # Solving for period 1
-    m1_grid, v1_grid, c1_grid = solve_period_1_stoch_norm(rho, beta, r, v2_interp_func, v1, p)
-    
-    return m1_grid, c1_grid, m2_grid, c2_grid
-
 
 def solve_period_1_stoch(rho, beta, r, v2_interp_func, sigma_low, sigma_high, v1, p):
     
@@ -217,31 +184,4 @@ def solve_period_1_stoch(rho, beta, r, v2_interp_func, sigma_low, sigma_high, v1
         v1_grid[i] = -result.fun
         c1_grid[i] = result.x
      
-    c1_grid[c1_grid<0]=0
-
-    return m1_grid,v1_grid,c1_grid
-
-def solve_period_1_stoch_norm(rho, beta, r, v2_interp_func, v1, p):
-    
-    m1_grid = np.linspace(1e-8,5,300)
-    v1_grid = np.empty(300)
-    c1_grid = np.empty(300)
-
-    # For each m1 in grid
-    for i,m1 in enumerate(m1_grid):
-        
-        sigma = np.fmax(np.random.normal(0.3,0.1,size=1),0)
-
-        # Defining obj func
-        obj = lambda c1: -v1(c1, m1, rho, beta, r, sigma, v2_interp_func, p)
-                
-        # Optimize bounded
-        result = optimize.minimize_scalar(obj, method='bounded',bounds=(1e-8,m1))
-        
-        # Save results
-        v1_grid[i] = -result.fun
-        c1_grid[i] = result.x
-     
-    c1_grid[c1_grid<0]=0
-    
     return m1_grid,v1_grid,c1_grid
