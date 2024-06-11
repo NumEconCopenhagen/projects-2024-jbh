@@ -53,7 +53,7 @@ class ConSavModel:
         '''
         return copy.deepcopy(self)
 
-    def solve_cons_crra(self, m1):
+    def solve_cons_crra(self, m1) -> tuple[float, float]:
         '''
         Solve for the optimal consumption in period 1 and 2 given intial endowments. Assumes a constant relative risk aversion utility function.
 
@@ -82,7 +82,7 @@ class ConSavModel:
 
         return c1_star, c2_star
 
-    def utility_crra(self, c):
+    def utility_crra(self, c) -> float | int:
         '''
         Constant relative risk aversion utility function.
 
@@ -93,13 +93,13 @@ class ConSavModel:
 
         Returns:
         --------
-            float: 
+            float | int: 
                 A numeric utility value.
         '''
         util = (c**(1-self.rho))/(1-self.rho)
         return util
 
-    def v1_func(self, c1, m1, v2_interp_func):
+    def v1_func(self, c1, m1, v2_interp_func) -> float | int:
         '''
         A (utility) value function in period 1. Assumes CRRA utility with bequest component. Includes expected utility in period 2.
 
@@ -130,7 +130,7 @@ class ConSavModel:
 
         return self.utility_crra(c1) + self.beta*total
     
-    def v1_func_no_risk(self, c1, m1, v2_interp_func):
+    def v1_func_no_risk(self, c1, m1, v2_interp_func) -> float | int:
         '''
         A (utility) value function in period 1. Assumes CRRA utility with bequest component and no risk. Includes expected utility in period 2.
 
@@ -155,7 +155,7 @@ class ConSavModel:
         return self.utility_crra(c1) + self.beta*exp_v2
 
 
-    def v1_func_stoch(self, c1, m1, sigma, v2_interp_func):
+    def v1_func_stoch(self, c1, m1, sigma, v2_interp_func) -> float | int:
         '''
         A (utility) value function in period 1. Assumes CRRA utility with bequest component under stochastic income risk. Includes expected utility in period 2.
 
@@ -182,7 +182,7 @@ class ConSavModel:
 
         return self.utility_crra(c1) + self.beta*total
 
-    def interp(self, m_grid, v_grid):
+    def interp(self, m_grid, v_grid) -> interpolate.RegularGridInterpolator:
         '''
         A (linear) interpolate function to derive expected utility one period ahead of time. 
 
@@ -202,7 +202,7 @@ class ConSavModel:
                                                         bounds_error=False,fill_value=None)
         return func
     
-    def v2_func(self, c2, m2):
+    def v2_func(self, c2, m2) -> float | int:
         '''
         A (utility) value function in period 2. Assumes CRRA utility with bequest component.
 
@@ -223,7 +223,7 @@ class ConSavModel:
         beq = self.gamma*(m2-c2+self.kappa)**(1-self.rho)/(1-self.rho)
         return cons+beq
     
-    def solve_period_1(self, v2_interp_func, v1):
+    def solve_period_1(self, v2_interp_func, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         '''
         Function that solves an agent's maximization problem in period 1.
 
@@ -259,7 +259,7 @@ class ConSavModel:
         
         return m1_grid, v1_grid, c1_grid
 
-    def solve_period_2(self):
+    def solve_period_2(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         '''
         Function that solves an agent's maximization problem in period 2. Takes only previously defined (exogenous) parameters.
 
@@ -288,7 +288,7 @@ class ConSavModel:
         
         return m2_grid, v2_grid, c2_grid
 
-    def solve_period_1_no_risk(self, v2_interp_func, v1):
+    def solve_period_1_no_risk(self, v2_interp_func, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         '''
         Function that solves an agent's maximization problem in period 1 under no income risk.
 
@@ -322,9 +322,9 @@ class ConSavModel:
             v1_grid[i] = -result.fun
             c1_grid[i] = result.x
         
-        return m1_grid,v1_grid,c1_grid
+        return m1_grid, v1_grid, c1_grid
     
-    def solve_period_1_stoch(self, v2_interp_func, v1):
+    def solve_period_1_stoch(self, v2_interp_func, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         '''
         Function that solves an agent's maximization problem in period 1 under stochastic income risk. Risk parameters are defined when instantiating the model.
 
@@ -361,7 +361,7 @@ class ConSavModel:
         
         return m1_grid, v1_grid, c1_grid
     
-    def solvez_no_risk(self, v1):
+    def solvez_no_risk(self, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         '''
         Compound that solves the agent's maximization problem under no income risk in its entirety.
 
@@ -386,7 +386,7 @@ class ConSavModel:
         
         return m1_grid, c1_grid, m2_grid, c2_grid
 
-    def solvez(self, v1):
+    def solvez(self, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         '''
         Compound that solves the agent's maximization problem in its entirety.
 
@@ -411,7 +411,7 @@ class ConSavModel:
         
         return m1_grid, c1_grid, m2_grid, c2_grid
 
-    def solvez_stoch(self, v1):
+    def solvez_stoch(self, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         '''
         Compound that solves the agent's maximization problem under stochastic income risk in its entirety.
 
