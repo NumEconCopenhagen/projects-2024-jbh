@@ -6,7 +6,7 @@ class ConSavModel:
     def __init__(self, r: float = 0.05, beta: float = 0.95, rho: float | int = 5, gamma: float | int = None, delta: float | int = None, kappa: float | int = None, sigma_low: float | int = None, sigma_high: float | int = None, p: float = 0.5):
 
         '''
-        Initialize exchange consumption-saving model class.
+        Initialize consumption-saving model class.
         Change model parameters as needed to analyze solutions.
 
         Parameters:
@@ -165,6 +165,8 @@ class ConSavModel:
                 Consumption in period 1.
             m1: float | int
                 Wealth/endowment in period 1.
+            sigma: float
+                Stochastic risk parameter that influences (expected) wealth levels in period 2. 
 
         Returns:
         --------
@@ -266,7 +268,7 @@ class ConSavModel:
         Returns:
         --------
             tuple: 
-                A tuple of np.ndarrays with endowments (m2), value functions (v2) and consumption in period 2 (c2).
+                A tuple of np.ndarrays with endowments (m2), numeric utility (v2) and consumption in period 2 (c2).
         '''        
         # Defining grids
         m2_grid = np.linspace(1e-8,5,500)
@@ -326,7 +328,7 @@ class ConSavModel:
     
     def solve_period_1_stoch(self, v2_interp_func, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         '''
-        Function that solves an agent's maximization problem in period 1 under stochastic income risk. Risk parameters are defined when instantiating the model.
+        Function that solves an agent's maximization problem in period 1 under stochastic income risk. Risk parameters are defined when creating an instance of the model.
 
         Parameters:
         ------
@@ -363,7 +365,7 @@ class ConSavModel:
     
     def solvez_no_risk(self, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         '''
-        Compound that solves the agent's maximization problem under no income risk in its entirety.
+        Compound function that solves the agent's maximization problem under no income risk in its entirety.
 
         Parameters:
         ------
@@ -388,7 +390,7 @@ class ConSavModel:
 
     def solvez(self, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         '''
-        Compound that solves the agent's maximization problem in its entirety.
+        Compound function that solves the agent's maximization problem in its entirety.
 
         Parameters:
         ------
@@ -413,7 +415,7 @@ class ConSavModel:
 
     def solvez_stoch(self, v1) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         '''
-        Compound that solves the agent's maximization problem under stochastic income risk in its entirety.
+        Compound function that solves the agent's maximization problem under stochastic income risk in its entirety.
 
         Parameters:
         ------
