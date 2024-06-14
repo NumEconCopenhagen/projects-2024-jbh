@@ -1,6 +1,6 @@
 import numpy as np
 from types import SimpleNamespace
-
+import matplotlib.pyplot as plt
 
 
 class ExchangeEconomyClass:
@@ -162,3 +162,15 @@ class ExchangeEconomyClass:
         market_clearing_p=P_1[ids][0]
 
         return market_clearing_p
+    
+    def indifference_curve_A(self, u_A, x1_vals):
+        '''Compute indifference curve for agent A for a given utility level u_A.'''
+        alpha = self.par.alpha
+        x2_vals = (u_A / (x1_vals ** alpha)) ** (1 / (1 - alpha))
+        return x2_vals
+    
+    def indifference_curve_B(self, u_B, x1_vals):
+        '''Compute indifference curve for agent B for a given utility level u_B.'''
+        beta = self.par.beta
+        x2_vals = (u_B / (x1_vals ** beta)) ** (1 / (1 - beta))
+        return x2_vals
