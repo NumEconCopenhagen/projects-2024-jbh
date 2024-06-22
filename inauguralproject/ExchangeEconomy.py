@@ -172,5 +172,5 @@ class ExchangeEconomyClass:
     def indifference_curve_B(self, u_B, x1_vals):
         '''Compute indifference curve for agent B for a given utility level u_B.'''
         beta = self.par.beta
-        x2_vals = (u_B / (x1_vals ** beta)) ** (1 / (1 - beta))
-        return x2_vals
+        x2_vals = (u_B / ((x1_vals) ** beta)) ** (1 / (1 - beta))
+        return 1-x2_vals
