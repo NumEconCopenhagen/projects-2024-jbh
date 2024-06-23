@@ -1,8 +1,8 @@
 # Exam project
 
-In this project, I 
+In this project, I solve economic problems involving numerical optimization and code the Barycentric Interpolation algorithm.
 
-The results of the project can be seen from running [exam_2024.ipynb](exaam_2024.ipynb). 
+The results of the project can be seen from running [exam_2024.ipynb](exam_2024.ipynb). 
 
 
 ## Dependencies:
